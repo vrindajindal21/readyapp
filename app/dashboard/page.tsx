@@ -16,6 +16,7 @@ import DailyQuoteWidget from "@/components/daily-quote-widget"
 import BrainGames from "@/components/brain-games"
 import FamilyFeatures from "@/components/family-features"
 import { NotificationSetupGuide } from "@/components/notification-setup-guide"
+import { PWABuilder } from "@/components/pwa-builder"
 
 type Task = { id: number; title: string; dueDate: string; completed: boolean; priority: string };
 type Event = { id: number; title: string; date: string; time: string; location: string };
@@ -559,6 +560,9 @@ export default function DashboardPage() {
       
       {/* Notification Setup Guide */}
       <NotificationSetupGuide />
+      
+      {/* PWA Builder */}
+      <PWABuilder />
     </div>
   )
 }

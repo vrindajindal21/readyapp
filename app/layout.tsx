@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://readyapp-zeta.vercel.app",
+    url: "https://dailybudddy.vercel.app",
     title: "DailyBuddy - Your Friendly Productivity Companion",
     description: "DailyBuddy helps you thrive with smart reminders, health tracking, and a friendly touch for all ages.",
     siteName: "DailyBuddy"
@@ -55,7 +55,8 @@ export const metadata: Metadata = {
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
     ]
-  }
+  },
+  metadataBase: new URL("https://dailybudddy.vercel.app"),
 }
 
 // Ensure reminders are always checked globally
