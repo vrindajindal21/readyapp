@@ -5,10 +5,20 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
+function isIOS() {
+  if (typeof window === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+}
+
+function isNotificationSupported() {
+  return typeof window !== 'undefined' && 'Notification' in window;
+}
+
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstall, setShowInstall] = useState(false)
   const installButtonRef = useRef(null)
+  const [notificationMessage, setNotificationMessage] = useState<string>("");
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -43,8 +53,8 @@ export default function Home() {
           <Link className="text-sm font-medium hover:underline underline-offset-4" href="#contact">Contact</Link>
         </nav>
       </header>
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-2 sm:px-4 py-6 animate-fade-in w-full">
-        <div className="flex flex-col items-center gap-4 mt-6 mb-8 w-full">
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-1 xs:px-2 sm:px-4 py-4 animate-fade-in w-full">
+        <div className="flex flex-col items-center gap-4 mt-4 mb-8 w-full">
           <img src="/placeholder-logo.svg" alt="DailyBuddy Logo" className="h-16 w-auto mb-2 drop-shadow-lg animate-bounce" />
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-2 text-gray-900 drop-shadow-sm">Meet Your DailyBuddy</h1>
           <p className="text-base sm:text-lg md:text-2xl text-gray-700 max-w-xl mb-4">
@@ -76,13 +86,19 @@ export default function Home() {
             <Button
               className="w-full bg-blue-500 text-white"
               onClick={async () => {
-                if (typeof window !== 'undefined' && 'Notification' in window) {
-                  const permission = await window.Notification.requestPermission();
-                  if (permission === 'granted') {
-                    window.alert('Notifications enabled!');
-                  } else {
-                    window.alert('Please allow notifications in your browser settings.');
-                  }
+                if (!isNotificationSupported()) {
+                  setNotificationMessage('Notifications are not supported on this device/browser.');
+                  return;
+                }
+                if (isIOS()) {
+                  setNotificationMessage('On iOS, add this app to your home screen to enable notifications.');
+                  return;
+                }
+                const permission = await window.Notification.requestPermission();
+                if (permission === 'granted') {
+                  setNotificationMessage('Notifications enabled!');
+                } else {
+                  setNotificationMessage('Please allow notifications in your browser settings.');
                 }
               }}
             >
@@ -91,25 +107,33 @@ export default function Home() {
             <Button
               className="w-full bg-green-600 text-white"
               onClick={async () => {
-                if (typeof window !== 'undefined' && 'Notification' in window) {
-                  if (window.Notification.permission === 'granted') {
-                    new window.Notification('DailyBuddy', {
-                      body: 'This is a test notification! 🎉',
-                      icon: '/android-chrome-192x192.png',
-                    });
-                  } else {
-                    window.alert('Please enable notifications first.');
-                  }
+                if (!isNotificationSupported()) {
+                  setNotificationMessage('Notifications are not supported on this device/browser.');
+                  return;
+                }
+                if (window.Notification.permission === 'granted') {
+                  new window.Notification('DailyBuddy', {
+                    body: 'This is a test notification! 🎉',
+                    icon: '/android-chrome-192x192.png',
+                  });
+                  setNotificationMessage('Test notification sent!');
+                } else {
+                  setNotificationMessage('Please enable notifications first.');
                 }
               }}
             >
               Test Notification
             </Button>
           </div>
+          {notificationMessage && (
+            <div className="mt-2 text-xs text-red-600 w-full max-w-xs mx-auto bg-white/80 rounded p-2">
+              {notificationMessage}
+            </div>
+          )}
         </div>
-        <section id="features" className="w-full max-w-6xl mx-auto py-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Features for Every Buddy</h2>
-          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6 w-full">
+        <section id="features" className="w-full max-w-6xl mx-auto py-6">
+          <h2 className="text-xl xs:text-2xl md:text-3xl font-bold mb-4 text-gray-800">Features for Every Buddy</h2>
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 xs:gap-3 sm:gap-4 md:gap-6 w-full">
             <Feature icon="⏲️" label="Pomodoro Timer" desc="Stay focused with fun work sessions" />
             <Feature icon="✅" label="Task Management" desc="Track assignments and to-dos" />
             <Feature icon="📅" label="Timetable" desc="Organize your schedule easily" />
@@ -134,9 +158,9 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <footer className="py-6 w-full flex flex-col items-center border-t mt-auto bg-white/80 px-2 sm:px-4">
+      <footer className="py-4 w-full flex flex-col items-center border-t mt-auto bg-white/80 px-1 xs:px-2 sm:px-4">
         <p className="text-xs text-gray-500 text-center">© 2025 DailyBuddy. Crafted with ❤️ by Vrinda Jindal.</p>
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 w-full max-w-xs justify-center items-center">
+        <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 mt-2 w-full max-w-xs justify-center items-center">
           <a
             href="https://wa.me/?text=Check%20out%20DailyBuddy%20%E2%80%93%20your%20friendly%20companion%20for%20a%20brighter%2C%20more%20organized%20day!%20Try%20it%20now%3A%20https%3A%2F%2Freadyapp-zeta.vercel.app%2F"
             target="_blank"
