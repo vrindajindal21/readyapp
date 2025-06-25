@@ -40,6 +40,8 @@ export function NotificationSetupGuide({ onComplete, showOnLoad = false }: Notif
   const [testMessage, setTestMessage] = useState("")
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     // Detect device type
     const userAgent = navigator.userAgent
     if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {

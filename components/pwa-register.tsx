@@ -7,6 +7,8 @@ export default function PWARegister() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     // Check if PWA is already installed
     const checkInstallation = () => {
       if (window.matchMedia('(display-mode: standalone)').matches || (window as any).navigator.standalone) {

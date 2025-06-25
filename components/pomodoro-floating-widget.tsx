@@ -32,6 +32,8 @@ export function PomodoroFloatingWidget() {
 
   // Initialize from localStorage and sync continuously
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const syncFromStorage = () => {
       const stored = localStorage.getItem(POMODORO_TIMER_KEY)
       if (!stored) return setTimer(null)
@@ -53,6 +55,8 @@ export function PomodoroFloatingWidget() {
 
   // Listen for global start/stop events
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handleStart = (e: any) => {
       const { duration, mode } = e.detail
       setTimer({
@@ -77,6 +81,8 @@ export function PomodoroFloatingWidget() {
 
   // Drag handlers
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!dragging.current) return
       const dx = e.clientX - dragStart.current.x

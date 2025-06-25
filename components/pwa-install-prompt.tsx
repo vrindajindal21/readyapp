@@ -26,6 +26,8 @@ export function PWAInstallPrompt({ onClose }: PWAInstallPromptProps) {
   const [deviceType, setDeviceType] = useState<"mobile" | "desktop">("desktop")
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     // Check if already installed
     const checkInstallation = () => {
       if (window.matchMedia('(display-mode: standalone)').matches || (window as any).navigator.standalone) {
@@ -86,7 +88,7 @@ export function PWAInstallPrompt({ onClose }: PWAInstallPromptProps) {
   }
 
   const handleShare = () => {
-    if (navigator.share) {
+    if (typeof window !== 'undefined' && navigator.share) {
       navigator.share({
         title: 'DailyBuddy',
         text: 'Install DailyBuddy for the best experience!',

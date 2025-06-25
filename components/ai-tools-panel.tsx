@@ -249,11 +249,13 @@ export function AIToolsPanel({ userData = {} }) {
   }
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text)
-    toast({
-      title: "Copied to clipboard",
-      description: "AI response copied successfully",
-    })
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+      toast({
+        title: "Copied to clipboard",
+        description: "AI response copied successfully",
+      })
+    }
   }
 
   const getDifficultyColor = (difficulty) => {

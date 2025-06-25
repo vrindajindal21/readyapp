@@ -41,6 +41,8 @@ export function SmartPopupSystem() {
 
   // Handle popup events
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handleShowPopup = (event: CustomEvent) => {
       console.log('show-popup event received:', event.detail); // DEBUG LOG
       const { type, title, message, duration = 5000, priority = "medium", actions, data } = event.detail

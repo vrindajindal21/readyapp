@@ -194,6 +194,8 @@ export function WeatherWidget() {
 
   // Enhanced location detection
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const getUserLocation = () => {
       if (navigator.geolocation) {
         const cachedLocation = localStorage.getItem("userLocation")

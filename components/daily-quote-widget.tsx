@@ -77,7 +77,7 @@ export default function DailyQuoteWidget() {
 
     const shareText = `"${quote.text}" - ${quote.author}`
 
-    if (navigator.share) {
+    if (typeof window !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
           title: "Daily Motivation",
@@ -89,11 +89,13 @@ export default function DailyQuoteWidget() {
     } else {
       // Fallback to clipboard
       try {
-        await navigator.clipboard.writeText(shareText)
-        toast({
-          title: "Quote copied to clipboard! 📋",
-          description: "Share this inspiration with others!",
-        })
+        if (typeof window !== 'undefined' && navigator.clipboard) {
+          await navigator.clipboard.writeText(shareText)
+          toast({
+            title: "Quote copied to clipboard! 📋",
+            description: "Share this inspiration with others!",
+          })
+        }
       } catch (error) {
         toast({
           title: "Unable to copy",

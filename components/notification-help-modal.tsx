@@ -135,7 +135,7 @@ export function NotificationHelpModal({ isOpen, onClose }: NotificationHelpModal
                       variant="outline" 
                       size="sm" 
                       onClick={() => {
-                        if (navigator.share) {
+                        if (typeof window !== 'undefined' && navigator.share) {
                           navigator.share({
                             title: 'DailyBuddy',
                             text: 'Add DailyBuddy to your home screen for notifications!',

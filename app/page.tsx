@@ -12,6 +12,8 @@ export default function Home() {
   const installButtonRef = useRef(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handler = (e: any) => {
       e.preventDefault()
       setDeferredPrompt(e)
