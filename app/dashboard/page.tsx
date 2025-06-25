@@ -15,31 +15,24 @@ import { useLanguage } from "@/components/language-provider"
 import DailyQuoteWidget from "@/components/daily-quote-widget"
 import BrainGames from "@/components/brain-games"
 import FamilyFeatures from "@/components/family-features"
+import { NotificationSetupGuide } from "@/components/notification-setup-guide"
+
+type Task = { id: number; title: string; dueDate: string; completed: boolean; priority: string };
+type Event = { id: number; title: string; date: string; time: string; location: string };
+type Habit = { id: number; name: string; completed: boolean; streak: number };
 
 export default function DashboardPage() {
   const { toast } = useToast()
   const { t } = useLanguage()
-  const [upcomingTasks, setUpcomingTasks] = useState([
-    { id: 1, title: "Math Assignment", dueDate: "2025-03-25", completed: false, priority: "high" },
-    { id: 2, title: "Physics Lab Report", dueDate: "2025-03-28", completed: false, priority: "medium" },
-    { id: 3, title: "Literature Essay", dueDate: "2025-04-02", completed: false, priority: "medium" },
-  ])
-  const [upcomingEvents, setUpcomingEvents] = useState([
-    { id: 1, title: "Math Lecture", date: "2025-03-23", time: "10:00 AM", location: "Room 101" },
-    { id: 2, title: "Group Study Session", date: "2025-03-24", time: "2:00 PM", location: "Library" },
-    { id: 3, title: "Physics Lab", date: "2025-03-26", time: "1:00 PM", location: "Science Building" },
-  ])
+  const [upcomingTasks, setUpcomingTasks] = useState<Task[]>([])
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
   const [studyStats, setStudyStats] = useState({
     todayMinutes: 120,
     weekMinutes: 540,
     monthMinutes: 2160,
     goalMinutes: 180,
   })
-  const [habits, setHabits] = useState([
-    { id: 1, name: "Read 30 minutes", completed: true, streak: 5 },
-    { id: 2, name: "Exercise", completed: false, streak: 3 },
-    { id: 3, name: "Drink water", completed: true, streak: 7 },
-  ])
+  const [habits, setHabits] = useState<Habit[]>([])
 
   const [isMounted, setIsMounted] = useState(false)
   const [dataInitialized, setDataInitialized] = useState(false)
@@ -64,39 +57,30 @@ export default function DashboardPage() {
   useEffect(() => {
     if (isMounted && !dataInitialized) {
       // Load tasks
-      const savedTasks = localStorage.getItem("tasks")
-      if (savedTasks) {
-        const parsedTasks = JSON.parse(savedTasks)
-        // Get upcoming incomplete tasks
-        const upcoming = parsedTasks
-          .filter((task) => !task.completed)
-          .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-          .slice(0, 3)
-
-        if (upcoming.length > 0) {
-          setUpcomingTasks(upcoming)
-        }
+      if (!localStorage.getItem("tasks")) {
+        setUpcomingTasks([
+          { id: 1, title: "Math Assignment", dueDate: "2025-03-25", completed: false, priority: "high" },
+          { id: 2, title: "Physics Lab Report", dueDate: "2025-03-28", completed: false, priority: "medium" },
+          { id: 3, title: "Literature Essay", dueDate: "2025-04-02", completed: false, priority: "medium" },
+        ])
       }
 
       // Load events
-      const savedEvents = localStorage.getItem("events")
-      if (savedEvents) {
-        const parsedEvents = JSON.parse(savedEvents)
-        // Get upcoming events
-        const upcoming = parsedEvents.sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 3)
-
-        if (upcoming.length > 0) {
-          setUpcomingEvents(upcoming)
-        }
+      if (!localStorage.getItem("events")) {
+        setUpcomingEvents([
+          { id: 1, title: "Math Lecture", date: "2025-03-23", time: "10:00 AM", location: "Room 101" },
+          { id: 2, title: "Group Study Session", date: "2025-03-24", time: "2:00 PM", location: "Library" },
+          { id: 3, title: "Physics Lab", date: "2025-03-26", time: "1:00 PM", location: "Science Building" },
+        ])
       }
 
       // Load habits
-      const savedHabits = localStorage.getItem("habits")
-      if (savedHabits) {
-        const parsedHabits = JSON.parse(savedHabits)
-        if (parsedHabits.length > 0) {
-          setHabits(parsedHabits.slice(0, 3))
-        }
+      if (!localStorage.getItem("habits")) {
+        setHabits([
+          { id: 1, name: "Read 30 minutes", completed: true, streak: 5 },
+          { id: 2, name: "Exercise", completed: false, streak: 3 },
+          { id: 3, name: "Drink water", completed: true, streak: 7 },
+        ])
       }
 
       // Load study stats
@@ -106,20 +90,18 @@ export default function DashboardPage() {
 
         // Calculate study stats
         const today = new Date()
-        const todaySessions = parsedSessions.filter(
-          (session) => new Date(session.date).toDateString() === today.toDateString(),
-        )
+        const todaySessions = parsedSessions.filter((session: any) => new Date(session.date).toDateString() === today.toDateString())
 
         const weekStart = new Date()
         weekStart.setDate(today.getDate() - today.getDay())
-        const weekSessions = parsedSessions.filter((session) => new Date(session.date) >= weekStart)
+        const weekSessions = parsedSessions.filter((session: any) => new Date(session.date) >= weekStart)
 
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-        const monthSessions = parsedSessions.filter((session) => new Date(session.date) >= monthStart)
+        const monthSessions = parsedSessions.filter((session: any) => new Date(session.date) >= monthStart)
 
-        const todayMinutes = todaySessions.reduce((total, session) => total + session.duration, 0)
-        const weekMinutes = weekSessions.reduce((total, session) => total + session.duration, 0)
-        const monthMinutes = monthSessions.reduce((total, session) => total + session.duration, 0)
+        const todayMinutes = todaySessions.reduce((total: number, session: any) => total + session.duration, 0)
+        const weekMinutes = weekSessions.reduce((total: number, session: any) => total + session.duration, 0)
+        const monthMinutes = monthSessions.reduce((total: number, session: any) => total + session.duration, 0)
 
         if (parsedSessions.length > 0) {
           setStudyStats({
@@ -135,7 +117,7 @@ export default function DashboardPage() {
     }
   }, [isMounted, dataInitialized])
 
-  const completeTask = (id) => {
+  const completeTask = (id: number) => {
     setUpcomingTasks((tasks) => tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
     toast({
       title: "Task updated! ✅",
@@ -143,7 +125,7 @@ export default function DashboardPage() {
     })
   }
 
-  const completeHabit = (id) => {
+  const completeHabit = (id: number) => {
     setHabits((habits) =>
       habits.map((habit) =>
         habit.id === id
@@ -514,7 +496,12 @@ export default function DashboardPage() {
           {/* Sidebar - Right Side */}
           <div className="space-y-6">
             <WeatherWidget />
-            <AiSuggestions tasks={upcomingTasks} habits={habits} studySessions={[]} goals={[]} />
+            <AiSuggestions 
+              tasks={upcomingTasks} 
+              habits={habits} 
+              studySessions={[]} 
+              goals={[]} 
+            />
 
             {/* Fun Features Widget */}
             <Card className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950 dark:to-rose-950 border-pink-200 dark:border-pink-800">
@@ -569,6 +556,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      
+      {/* Notification Setup Guide */}
+      <NotificationSetupGuide />
     </div>
   )
 }

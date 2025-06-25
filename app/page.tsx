@@ -4,21 +4,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-
-function isIOS() {
-  if (typeof window === 'undefined') return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-}
-
-function isNotificationSupported() {
-  return typeof window !== 'undefined' && 'Notification' in window;
-}
+import { NotificationSetupGuide } from "@/components/notification-setup-guide"
 
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showInstall, setShowInstall] = useState(false)
   const installButtonRef = useRef(null)
-  const [notificationMessage, setNotificationMessage] = useState<string>("");
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -81,55 +72,6 @@ export default function Home() {
               Install DailyBuddy App
             </Button>
           )}
-          {/* Notification Buttons for Mobile */}
-          <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full max-w-xs mx-auto">
-            <Button
-              className="w-full bg-blue-500 text-white"
-              onClick={async () => {
-                if (!isNotificationSupported()) {
-                  setNotificationMessage('Notifications are not supported on this device/browser.');
-                  return;
-                }
-                if (isIOS()) {
-                  setNotificationMessage('On iOS, add this app to your home screen to enable notifications.');
-                  return;
-                }
-                const permission = await window.Notification.requestPermission();
-                if (permission === 'granted') {
-                  setNotificationMessage('Notifications enabled!');
-                } else {
-                  setNotificationMessage('Please allow notifications in your browser settings.');
-                }
-              }}
-            >
-              Enable Notifications
-            </Button>
-            <Button
-              className="w-full bg-green-600 text-white"
-              onClick={async () => {
-                if (!isNotificationSupported()) {
-                  setNotificationMessage('Notifications are not supported on this device/browser.');
-                  return;
-                }
-                if (window.Notification.permission === 'granted') {
-                  new window.Notification('DailyBuddy', {
-                    body: 'This is a test notification! 🎉',
-                    icon: '/android-chrome-192x192.png',
-                  });
-                  setNotificationMessage('Test notification sent!');
-                } else {
-                  setNotificationMessage('Please enable notifications first.');
-                }
-              }}
-            >
-              Test Notification
-            </Button>
-          </div>
-          {notificationMessage && (
-            <div className="mt-2 text-xs text-red-600 w-full max-w-xs mx-auto bg-white/80 rounded p-2">
-              {notificationMessage}
-            </div>
-          )}
         </div>
         <section id="features" className="w-full max-w-6xl mx-auto py-6">
           <h2 className="text-xl xs:text-2xl md:text-3xl font-bold mb-4 text-gray-800">Features for Every Buddy</h2>
@@ -184,16 +126,19 @@ export default function Home() {
           <span className="text-xs text-gray-400 select-all">https://readyapp-zeta.vercel.app/</span>
         </div>
       </footer>
+      
+      {/* Notification Setup Guide */}
+      <NotificationSetupGuide />
     </div>
   )
 }
 
 function Feature({ icon, label, desc }: { icon: string; label: string; desc: string }) {
   return (
-    <div className="flex flex-col items-center bg-white/80 rounded-xl p-4 shadow-md hover:shadow-lg transition-all duration-200">
-      <span className="text-3xl md:text-4xl mb-2 animate-bounce">{icon}</span>
-      <span className="font-semibold text-base md:text-lg text-gray-800 mb-1">{label}</span>
-      <span className="text-xs md:text-sm text-gray-500 text-center">{desc}</span>
+    <div className="flex flex-col items-center p-4 bg-white/60 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+      <div className="text-3xl mb-2">{icon}</div>
+      <h3 className="font-semibold text-sm text-gray-800 mb-1 text-center">{label}</h3>
+      <p className="text-xs text-gray-600 text-center">{desc}</p>
     </div>
   )
 }

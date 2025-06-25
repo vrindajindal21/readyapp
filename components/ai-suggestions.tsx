@@ -4,11 +4,53 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { Lightbulb, RefreshCw, ThumbsUp, ThumbsDown, Sparkles } from "lucide-react"
+import { Lightbulb, RefreshCw, ThumbsUp, ThumbsDown, Sparkles, CheckSquare } from "lucide-react"
 
-export function AiSuggestions({ tasks = [], habits = [], studySessions = [], goals = [] }) {
+interface Task {
+  id: number
+  title: string
+  dueDate: string
+  completed: boolean
+  priority: string
+}
+
+interface Habit {
+  id: number
+  name: string
+  completed: boolean
+  streak: number
+}
+
+interface StudySession {
+  id: string
+  date: string
+  duration: number
+}
+
+interface Goal {
+  id: string
+  title: string
+  progress: number
+}
+
+interface Suggestion {
+  id: string
+  type: string
+  text: string
+  actionText: string
+  actionLink: string
+}
+
+interface AiSuggestionsProps {
+  tasks?: Task[]
+  habits?: Habit[]
+  studySessions?: StudySession[]
+  goals?: Goal[]
+}
+
+export function AiSuggestions({ tasks = [], habits = [], studySessions = [], goals = [] }: AiSuggestionsProps) {
   const { toast } = useToast()
-  const [suggestions, setSuggestions] = useState([])
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [loading, setLoading] = useState(true)
 
   // Generate dynamic suggestions based on user data
@@ -19,7 +61,7 @@ export function AiSuggestions({ tasks = [], habits = [], studySessions = [], goa
       try {
         await new Promise((resolve) => setTimeout(resolve, 800))
 
-        const dynamicSuggestions = []
+        const dynamicSuggestions: Suggestion[] = []
         const currentHour = new Date().getHours()
         const currentDay = new Date().getDay()
         const isWeekend = currentDay === 0 || currentDay === 6
@@ -199,27 +241,17 @@ export function AiSuggestions({ tasks = [], habits = [], studySessions = [], goa
           dynamicSuggestions.push({
             id: `getting-started-${Date.now()}`,
             type: "general",
-            text: "Welcome! Start by setting up your first task, habit, or goal to begin your productivity journey.",
+            text: "Welcome to DailyBuddy! Start by adding your first task or habit to get personalized suggestions.",
             actionText: "Get Started",
             actionLink: "/dashboard/tasks",
           })
         }
 
-        // Limit to 3-4 most relevant suggestions
-        const shuffled = [...dynamicSuggestions].sort(() => 0.5 - Math.random())
-        setSuggestions(shuffled.slice(0, Math.min(4, shuffled.length)))
-        setLoading(false)
+        setSuggestions(dynamicSuggestions)
       } catch (error) {
         console.error("Error generating suggestions:", error)
-        setSuggestions([
-          {
-            id: 0,
-            type: "error",
-            text: "Unable to generate suggestions right now. Please try again.",
-            actionText: "Retry",
-            actionLink: "#",
-          },
-        ])
+        setSuggestions([])
+      } finally {
         setLoading(false)
       }
     }
@@ -227,60 +259,33 @@ export function AiSuggestions({ tasks = [], habits = [], studySessions = [], goa
     generateSuggestions()
   }, [tasks, habits, studySessions, goals])
 
-  const handleFeedback = (suggestionId, isPositive) => {
+  const handleFeedback = (suggestionId: string, isPositive: boolean) => {
     toast({
-      title: isPositive ? "Thanks for the feedback!" : "We'll improve our suggestions",
-      description: isPositive
-        ? "We're glad you found this suggestion helpful."
-        : "We'll use your feedback to provide better suggestions.",
+      title: isPositive ? "Thanks for the feedback! 👍" : "Thanks for the feedback! 👎",
+      description: "We'll use this to improve your suggestions.",
     })
-
-    setSuggestions(suggestions.filter((s) => s.id !== suggestionId))
   }
 
   const refreshSuggestions = () => {
     setSuggestions([])
     setLoading(true)
-
-    // Regenerate suggestions
     setTimeout(() => {
-      const event = new Event("refresh-suggestions")
-      window.dispatchEvent(event)
-    }, 100)
+      setLoading(false)
+    }, 1000)
   }
 
-  const getSuggestionIcon = (type) => {
+  const getSuggestionIcon = (type: string) => {
     switch (type) {
       case "task":
-        return (
-          <div className="bg-blue-100 p-2 rounded-full dark:bg-blue-900">
-            <Lightbulb className="h-5 w-5 text-blue-500 dark:text-blue-300" />
-          </div>
-        )
+        return <CheckSquare className="h-4 w-4" />
       case "habit":
-        return (
-          <div className="bg-green-100 p-2 rounded-full dark:bg-green-900">
-            <Lightbulb className="h-5 w-5 text-green-500 dark:text-green-300" />
-          </div>
-        )
+        return <Sparkles className="h-4 w-4" />
       case "study":
-        return (
-          <div className="bg-purple-100 p-2 rounded-full dark:bg-purple-900">
-            <Lightbulb className="h-5 w-5 text-purple-500 dark:text-purple-300" />
-          </div>
-        )
+        return <Lightbulb className="h-4 w-4" />
       case "goal":
-        return (
-          <div className="bg-yellow-100 p-2 rounded-full dark:bg-yellow-900">
-            <Lightbulb className="h-5 w-5 text-yellow-500 dark:text-yellow-300" />
-          </div>
-        )
+        return <Sparkles className="h-4 w-4" />
       default:
-        return (
-          <div className="bg-gray-100 p-2 rounded-full dark:bg-gray-800">
-            <Lightbulb className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-          </div>
-        )
+        return <Lightbulb className="h-4 w-4" />
     }
   }
 
