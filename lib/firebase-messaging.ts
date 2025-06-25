@@ -2,10 +2,22 @@ import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { firebaseConfig, vapidKey } from './firebase-config';
 
-const app = initializeApp(firebaseConfig);
-export const messaging = getMessaging(app);
+let app: any = null;
+let messaging: any = null;
+
+// Only initialize Firebase on the client side
+if (typeof window !== 'undefined') {
+  app = initializeApp(firebaseConfig);
+  messaging = getMessaging(app);
+}
+
+export { messaging };
 
 export async function requestFcmToken() {
+  if (typeof window === 'undefined' || !messaging) {
+    return null;
+  }
+  
   try {
     const token = await getToken(messaging, { vapidKey });
     return token;
@@ -16,5 +28,9 @@ export async function requestFcmToken() {
 }
 
 export function onForegroundMessage(callback: (payload: any) => void) {
+  if (typeof window === 'undefined' || !messaging) {
+    return;
+  }
+  
   onMessage(messaging, callback);
 } 

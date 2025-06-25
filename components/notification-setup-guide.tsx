@@ -20,8 +20,19 @@ import {
   Share2,
   HelpCircle
 } from "lucide-react"
-import { requestFcmToken, onForegroundMessage } from "@/lib/firebase-messaging"
+import { useToast } from "@/hooks/use-toast"
 import { NotificationHelpModal } from "@/components/notification-help-modal"
+
+// Dynamic imports to prevent SSR issues
+let requestFcmToken: any = null;
+let onForegroundMessage: any = null;
+
+if (typeof window !== 'undefined') {
+  import("@/lib/firebase-messaging").then((module) => {
+    requestFcmToken = module.requestFcmToken;
+    onForegroundMessage = module.onForegroundMessage;
+  });
+}
 
 interface NotificationSetupGuideProps {
   onComplete?: () => void
@@ -79,8 +90,8 @@ export function NotificationSetupGuide({ onComplete, showOnLoad = false }: Notif
 
   // Listen for foreground FCM messages
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      onForegroundMessage((payload) => {
+    if (typeof window !== 'undefined' && onForegroundMessage) {
+      onForegroundMessage((payload: any) => {
         setTestMessage(`✅ Received: ${payload.notification?.title || 'Notification'}: ${payload.notification?.body || ''}`)
         setTimeout(() => setTestMessage(""), 5000)
       })
@@ -99,14 +110,19 @@ export function NotificationSetupGuide({ onComplete, showOnLoad = false }: Notif
       
       if (permission === 'granted') {
         // Request FCM token
-        const token = await requestFcmToken()
-        if (token) {
-          setFcmToken(token)
-          setTestMessage("✅ Notifications enabled! FCM token received.")
-          onComplete?.()
-          return true
+        if (requestFcmToken) {
+          const token = await requestFcmToken()
+          if (token) {
+            setFcmToken(token)
+            setTestMessage("✅ Notifications enabled! FCM token received.")
+            onComplete?.()
+            return true
+          } else {
+            setTestMessage("⚠️ Notifications enabled, but FCM token failed. Notifications may not work when app is closed.")
+            return false
+          }
         } else {
-          setTestMessage("⚠️ Notifications enabled, but FCM token failed. Notifications may not work when app is closed.")
+          setTestMessage("⚠️ Notifications enabled, but FCM service not available.")
           return false
         }
       } else {
