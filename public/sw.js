@@ -1,6 +1,19 @@
-// Enhanced Service Worker for rich push notifications
-const CACHE_NAME = "productivity-app-v1"
-const urlsToCache = ["/", "/dashboard", "/favicon.ico"]
+// Enhanced Service Worker for rich push notifications and PWA caching
+const CACHE_NAME = "dailybuddy-v2"
+const urlsToCache = [
+  "/",
+  "/dashboard",
+  "/dashboard/tasks",
+  "/dashboard/pomodoro",
+  "/dashboard/study",
+  "/dashboard/habits",
+  "/dashboard/health",
+  "/favicon.ico",
+  "/manifest.json",
+  "/android-chrome-192x192.png",
+  "/android-chrome-512x512.png",
+  "/apple-touch-icon.png"
+]
 
 // Firebase Cloud Messaging setup
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
@@ -137,7 +150,10 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
       .then(() => self.skipWaiting()),
   )
 })
@@ -150,6 +166,7 @@ self.addEventListener("activate", (event) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
             if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName)
             }
           }),
@@ -159,11 +176,66 @@ self.addEventListener("activate", (event) => {
   )
 })
 
-// Handle fetch requests
+// Handle fetch requests with cache-first strategy
 self.addEventListener("fetch", (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Skip chrome-extension requests
+  if (event.request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request)
-    })
-  )
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached version or fetch from network
+        if (response) {
+          return response;
+        }
+
+        return fetch(event.request).then(
+          (response) => {
+            // Check if we received a valid response
+            if(!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          }
+        );
+      })
+      .catch(() => {
+        // Return offline page for navigation requests
+        if (event.request.mode === 'navigate') {
+          return caches.match('/');
+        }
+      })
+  );
 })
+
+// Handle background sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync());
+  }
+});
+
+async function doBackgroundSync() {
+  try {
+    // Perform background sync tasks
+    console.log('Background sync completed');
+  } catch (error) {
+    console.error('Background sync failed:', error);
+  }
+}
