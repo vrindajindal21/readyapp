@@ -43,11 +43,11 @@ export default function Home() {
           <Link className="text-sm font-medium hover:underline underline-offset-4" href="#contact">Contact</Link>
         </nav>
       </header>
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 py-8 animate-fade-in">
-        <div className="flex flex-col items-center gap-4 mt-8 mb-8">
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-2 sm:px-4 py-6 animate-fade-in w-full">
+        <div className="flex flex-col items-center gap-4 mt-6 mb-8 w-full">
           <img src="/placeholder-logo.svg" alt="DailyBuddy Logo" className="h-16 w-auto mb-2 drop-shadow-lg animate-bounce" />
-          <h1 className="text-3xl md:text-5xl font-extrabold mb-2 text-gray-900 drop-shadow-sm">Meet Your DailyBuddy</h1>
-          <p className="text-lg md:text-2xl text-gray-700 max-w-xl mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-2 text-gray-900 drop-shadow-sm">Meet Your DailyBuddy</h1>
+          <p className="text-base sm:text-lg md:text-2xl text-gray-700 max-w-xl mb-4">
             Your friendly companion for a brighter, more organized day. Plan, grow, and thrive with a buddy by your side—no matter your age or dream!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-xs mx-auto">
@@ -71,10 +71,45 @@ export default function Home() {
               Install DailyBuddy App
             </Button>
           )}
+          {/* Notification Buttons for Mobile */}
+          <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full max-w-xs mx-auto">
+            <Button
+              className="w-full bg-blue-500 text-white"
+              onClick={async () => {
+                if (typeof window !== 'undefined' && 'Notification' in window) {
+                  const permission = await window.Notification.requestPermission();
+                  if (permission === 'granted') {
+                    window.alert('Notifications enabled!');
+                  } else {
+                    window.alert('Please allow notifications in your browser settings.');
+                  }
+                }
+              }}
+            >
+              Enable Notifications
+            </Button>
+            <Button
+              className="w-full bg-green-600 text-white"
+              onClick={async () => {
+                if (typeof window !== 'undefined' && 'Notification' in window) {
+                  if (window.Notification.permission === 'granted') {
+                    new window.Notification('DailyBuddy', {
+                      body: 'This is a test notification! 🎉',
+                      icon: '/android-chrome-192x192.png',
+                    });
+                  } else {
+                    window.alert('Please enable notifications first.');
+                  }
+                }
+              }}
+            >
+              Test Notification
+            </Button>
+          </div>
         </div>
-        <section id="features" className="w-full max-w-2xl mx-auto py-8">
+        <section id="features" className="w-full max-w-6xl mx-auto py-8">
           <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">Features for Every Buddy</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6 w-full">
             <Feature icon="⏲️" label="Pomodoro Timer" desc="Stay focused with fun work sessions" />
             <Feature icon="✅" label="Task Management" desc="Track assignments and to-dos" />
             <Feature icon="📅" label="Timetable" desc="Organize your schedule easily" />
@@ -99,9 +134,9 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <footer className="py-6 w-full flex flex-col items-center border-t mt-auto bg-white/80">
-        <p className="text-xs text-gray-500">© 2025 DailyBuddy. Crafted with ❤️ by Vrinda Jindal.</p>
-        <div className="flex gap-4 mt-2">
+      <footer className="py-6 w-full flex flex-col items-center border-t mt-auto bg-white/80 px-2 sm:px-4">
+        <p className="text-xs text-gray-500 text-center">© 2025 DailyBuddy. Crafted with ❤️ by Vrinda Jindal.</p>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 w-full max-w-xs justify-center items-center">
           <a
             href="https://wa.me/?text=Check%20out%20DailyBuddy%20%E2%80%93%20your%20friendly%20companion%20for%20a%20brighter%2C%20more%20organized%20day!%20Try%20it%20now%3A%20https%3A%2F%2Freadyapp-zeta.vercel.app%2F"
             target="_blank"
